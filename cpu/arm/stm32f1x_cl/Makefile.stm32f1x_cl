@@ -7,9 +7,9 @@ SUBTARGET = 7VCT
 endif
 
 ### libopencm3 specifics
-OPENCM3_BASE=
-OPENCM3_FAMILY=STM32F1
-OPENCM3_LIB=opencm3_stm32f1
+OPENCM3_BASE?=
+OPENCM3_FAMILY?=STM32F1
+OPENCM3_LIB?=opencm3_stm32f1
 
 ifndef OPENCM3_BASE
 $(error OPENCM3_BASE not defined. Please set definition to root of libopencm3)
@@ -55,7 +55,12 @@ XSLTPROC=xsltproc
 
 PROJECT_OBJECTFILES += ${addprefix $(OBJECTDIR)/,$(CONTIKI_TARGET_MAIN:.c=.o)}
 
+ifdef LINKERFILE
+LINKERSCRIPT=$(CONTIKI_CPU)/$(LINKERFILE)
+endif
+ifndef LINKERSCRIPT
 LINKERSCRIPT = $(CONTIKI_CPU)/STM32F10$(SUBTARGET).ld
+endif
 
 # DFU-UTIL program upload
 DFU_UTIL=dfu-util
@@ -73,7 +78,7 @@ CFLAGSNO = -I. -I$(CONTIKI)/core -I$(CONTIKI_CPU) \
            -I$(CONTIKI)/platform/$(TARGET) \
            ${addprefix -I,$(APPDIRS)} \
            -DMCK=$(MCK) -DSUBTARGET=$(SUBTARGET) \
-           -Wall $(ARCH_FLAGS) -g -DSTM32F1 -MD
+           -Wall $(ARCH_FLAGS) -g -D$(OPENCM3_FAMILY) -MD
 
 CFLAGS  += $(CONTIKI_CFLAGS) $(CFLAGSNO) -Os
 
