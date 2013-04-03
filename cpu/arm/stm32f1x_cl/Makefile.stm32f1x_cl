@@ -2,11 +2,6 @@
 # This makefile should work for any chip supported by libopencm3,
 # but is particularly known to work for stm32f107 and l151
 
-ifndef SUBTARGET
-$(warning SUBTARGET not defined, defaulting to STM32F107VCT)
-SUBTARGET = STM32F107VCT
-endif
-
 ### libopencm3 specifics
 OPENCM3_BASE?=
 OPENCM3_FAMILY?=STM32F1
@@ -69,6 +64,10 @@ ifdef LINKERFILE
 LINKERSCRIPT=$(LINKERFILE)
 endif
 ifndef LINKERSCRIPT
+ifndef SUBTARGET
+$(warning SUBTARGET not defined, defaulting to STM32F107VCT)
+SUBTARGET = STM32F107VCT
+endif
 LINKERSCRIPT = $(CONTIKI_CPU)/$(SUBTARGET).ld
 $(warning defaulting the linkerscript to $(LINKERSCRIPT) this is probably bad)
 endif
