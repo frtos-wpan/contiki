@@ -1,0 +1,6 @@
+STM32 targets based on libopencm3
+
+libopencm3 should make it possible to have a largely common core port for all
+devices supported by libopencm3, with only board specifics like clock speeds
+and radio connections in the platform code.  This should hopefully avoid a
+proliferation of trivially different cpu/arm/xxxx implementations
