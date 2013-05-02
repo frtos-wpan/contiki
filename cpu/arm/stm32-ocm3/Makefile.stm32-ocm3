@@ -60,16 +60,8 @@ XSLTPROC=xsltproc
 
 PROJECT_OBJECTFILES += ${addprefix $(OBJECTDIR)/,$(CONTIKI_TARGET_MAIN:.c=.o)}
 
-ifdef LINKERFILE
-LINKERSCRIPT=$(LINKERFILE)
-endif
 ifndef LINKERSCRIPT
-ifndef SUBTARGET
-$(warning SUBTARGET not defined, defaulting to STM32F107VCT)
-SUBTARGET = STM32F107VCT
-endif
-LINKERSCRIPT = $(CONTIKI_CPU)/$(SUBTARGET).ld
-$(warning defaulting the linkerscript to $(LINKERSCRIPT) this is probably bad)
+$(warning no LINKERSCRIPT provided, this is probably not going to end well)
 endif
 
 # DFU-UTIL program upload
