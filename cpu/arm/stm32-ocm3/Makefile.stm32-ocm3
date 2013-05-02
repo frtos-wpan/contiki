@@ -95,15 +95,6 @@ CDEPFLAGS = $(CFLAGS) -D __MAKING_DEPS__
 
 ### Setup directory search path for source files
 
-CUSTOM_RULE_C_TO_OBJECTDIR_O=yes
-CUSTOM_RULE_C_TO_O=yes
-
-%.o: %.c
-	$(CC) $(CFLAGS) $< -c
-
-$(OBJECTDIR)/%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
 
 CUSTOM_RULE_S_TO_OBJECTDIR_O = yes
 %.o: %.S
@@ -112,11 +103,6 @@ CUSTOM_RULE_S_TO_OBJECTDIR_O = yes
 $(OBJECTDIR)/%.o: %.S
 	$(CC) $(CFLAGS) $< -c  -o $@
 
-
-CUSTOM_RULE_C_TO_CO=yes
-
-%.co: %.c
-	$(CC) $(CFLAGS) $< -c -o $@
 
 CUSTOM_RULE_C_TO_CE=yes
 
