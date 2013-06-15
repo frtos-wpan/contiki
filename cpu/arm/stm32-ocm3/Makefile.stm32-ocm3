@@ -24,6 +24,9 @@ OPENCM3_LIB:=opencm3_$(xOPENCM3_LIB)
 CONTIKI_CPU_ARM=$(CONTIKI)/cpu/arm
 CONTIKI_CPU_ARM_COMMON=$(CONTIKI_CPU_ARM)/common
 
+### CPU-dependent cleanup files
+CLEAN += symbols.c symbols.h *.d *.elf
+
 ### Define the CPU directory
 CONTIKI_CPU=$(CONTIKI_CPU_ARM)/stm32-ocm3
 
@@ -31,7 +34,7 @@ CONTIKI_CPU=$(CONTIKI_CPU_ARM)/stm32-ocm3
 
 CONTIKI_CPU_DIRS = .
 
-STM32OCM3 = clock.c util.c uip-log.c symbols.c
+STM32OCM3 = clock.c util.c uip-log.c
 
 #Using the opencm3 usb library for now
 #include $(CONTIKI_CPU_ARM_COMMON)/usb/Makefile.usb
