@@ -5,7 +5,7 @@
 #include "contiki-conf.h"
 
 #ifndef DEBUG_UART_CONF 
-#error Must define DEBUG_UART_CONF (1,2,3)
+#error Must define DEBUG_UART_CONF (1,2,3,6)
 #endif
 
 #if (DEBUG_UART_CONF == 1)
@@ -20,6 +20,10 @@
 #define DEBUG_UART USART3
 #define DEBUG_UART_NVIC NVIC_USART3_IRQ
 #define DEBUG_UART_ISR usart3_isr
+#elif (DEBUG_UART_CONF == 6)
+#define DEBUG_UART USART6
+#define DEBUG_UART_NVIC NVIC_USART6_IRQ
+#define DEBUG_UART_ISR usart6_isr
 #else
 #error unknown DEBUG_UART_CONF definition!
 #endif
