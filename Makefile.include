@@ -118,7 +118,7 @@ endif
 
 ### Verbosity control. Use  make V=1  to get verbose builds.
 
-CC_normal	:= $(CC) #-mfpu=fpv4-sp-d16 -mfloat-abi=softfp
+CC_normal	:= $(CC)
 AR_normal	:= $(AR)
 
 CC_quiet	= @echo "  CC       " $< && $(CC_normal)
