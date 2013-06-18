@@ -74,12 +74,11 @@ DFU_UTIL_OFFSET=0x08000000
 # Use dfu-util by default
 PROG=dfuutil
 
-ARCH_FLAGS_STM32F1 = -mcpu=cortex-m3 -mthumb
-ARCH_FLAGS_STM32F4 = -mcpu=cortex-m4 -mthumb -march=armv7e-m \
-		     -mfloat-abi=hard -mfpu=fpv4-sp-d16
-# Default any family we don't list explicitly to basic CM3.
-ARCH_FLAGS_$(OPENCM3_FAMILY) ?= $(ARCH_FLAGS_STM32F1)
-ARCH_FLAGS = $(ARCH_FLAGS_$(OPENCM3_FAMILY))
+ifndef ARCH_FLAGS
+$(warning defaulting ARCH_FLAGS to cortex M3, hope that is what you wanted!)
+ARCH_FLAGS = -mcpu=cortex-m3 -mthumb
+endif
+
 
 #CONTIKI_CFLAGS = -DWITH_UIP -DWITH_ASCII
 
