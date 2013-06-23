@@ -74,11 +74,8 @@ DFU_UTIL_OFFSET=0x08000000
 # Use dfu-util by default
 PROG=dfuutil
 
-ifndef ARCH_FLAGS
-$(warning defaulting ARCH_FLAGS to cortex M3, hope that is what you wanted!)
-ARCH_FLAGS = -mcpu=cortex-m3 -mthumb
-endif
-
+# TODO - this would need to be changed for m4 and m0
+ARCH_FLAGS= -mcpu=cortex-m3 -mthumb
 
 #CONTIKI_CFLAGS = -DWITH_UIP -DWITH_ASCII
 
