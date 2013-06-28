@@ -131,14 +131,9 @@ clock_delay(unsigned int t)
 static
 void inner_delay_usec_one(void)
 {
-	u32 before = STK_VAL;
-	u32 diff = before - CLOCK_MICROSECOND_SYSTICK;
-	if (diff > STK_LOAD) {
-		// TODO -handle wrapping
-	} else {
-		while (STK_VAL > (diff)) {
-			;
-		}
+	uint32_t before = STK_VAL;
+	while (STK_VAL - before <  CLOCK_MICROSECOND_SYSTICK) {
+		;
 	}
 }
 
