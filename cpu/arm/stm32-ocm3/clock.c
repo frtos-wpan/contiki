@@ -132,7 +132,6 @@ static
 void inner_delay_usec_one(void)
 {
 /*
-<<<<<<< HEAD
 	u32 before = STK_VAL;
 	u32 diff = before - CLOCK_MICROSECOND_SYSTICK;
 	if (diff > STK_LOAD) {
@@ -141,12 +140,6 @@ void inner_delay_usec_one(void)
 		while (STK_VAL > (diff)) {
 			;
 		}
-=======
-	uint32_t before = STK_VAL;
-	while (STK_VAL - before <  CLOCK_MICROSECOND_SYSTICK) {
-		;
-	}
->>>>>>> karl/locm3
 */
 	int32_t end_low = STK_VAL - CLOCK_MICROSECOND_SYSTICK;
 	int32_t end_high = end_low + STK_LOAD;
@@ -172,4 +165,8 @@ clock_delay_usec(uint16_t dt)
 	while (dt--) {
 		inner_delay_usec_one();
 	}
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> karl/locm3

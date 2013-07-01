@@ -6,7 +6,6 @@
 
 #ifndef DEBUG_UART_CONF 
 #error Must define DEBUG_UART_CONF (1,2,3,6)
-#endif
 
 #if (DEBUG_UART_CONF == 1)
 #define DEBUG_UART USART1
@@ -20,10 +19,13 @@
 #define DEBUG_UART USART3
 #define DEBUG_UART_NVIC NVIC_USART3_IRQ
 #define DEBUG_UART_ISR usart3_isr
+<<<<<<< HEAD
 #elif (DEBUG_UART_CONF == 6)
 #define DEBUG_UART USART6
 #define DEBUG_UART_NVIC NVIC_USART6_IRQ
 #define DEBUG_UART_ISR usart6_isr
+=======
+>>>>>>> karl/locm3
 #else
 #error unknown DEBUG_UART_CONF definition!
 #endif
@@ -37,4 +39,8 @@
  */
 void uart_init_arch(void);
 
+<<<<<<< HEAD
 #endif
+=======
+#endif
+>>>>>>> karl/locm3
