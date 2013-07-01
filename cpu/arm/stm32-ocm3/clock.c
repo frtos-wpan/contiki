@@ -141,15 +141,20 @@ void inner_delay_usec_one(void)
 			;
 		}
 */
-	int32_t end_low = STK_VAL - CLOCK_MICROSECOND_SYSTICK;
-	int32_t end_high = end_low + STK_LOAD;
+	int32_t start = STK_VAL;
+	int32_t end = start - CLOCK_MICROSECOND_SYSTICK;
 	int32_t now;
 
-
-	do {
- 		now = STK_VAL;
+	if (end < 0) {
+		end += STK_LOAD;
+		do {
+			now = STK_VAL;
+		} while (now <= start || now > end);
+	} else {
+		do {
+			now = STK_VAL;
+		} while (now <= start && now > end);
 	}
-	while (now > end_low && now < end_high);
 }
 
 /**
