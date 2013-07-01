@@ -165,8 +165,4 @@ clock_delay_usec(uint16_t dt)
 	while (dt--) {
 		inner_delay_usec_one();
 	}
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> karl/locm3
