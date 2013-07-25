@@ -80,11 +80,16 @@ sys_tick_handler(void)
  * speed is equal to sysclock, but could still range from 8Mhz (Default HSI on
  * stm32f100 through to 168Mhz (stm32f4 at max speed)
  */
+
+#define	PERIOD_SYSTICK	((AHB_SPEED / 8 + CLOCK_SECOND - 1) / CLOCK_SECOND)
+#define	HALF_PERIOD_SYSTICK	(PERIOD_SYSTICK / 2)
+#define	HALF_PERIOD_MICROSECOND	(500000 / CLOCK_SECOND)
+
 void
 clock_init()
 {
 	systick_set_clocksource(STK_CTRL_CLKSOURCE_AHB_DIV8);
-	systick_set_reload(AHB_SPEED / 8 / CLOCK_SECOND);
+	systick_set_reload(PERIOD_SYSTICK - 1);
 	systick_interrupt_enable();
 	systick_counter_enable();
 }
@@ -142,8 +147,14 @@ clock_delay_usec(uint16_t dt)
 	int32_t period = STK_LOAD + 1;
 	int32_t end, now;
 
-	while (dt--) {
-		end = start - CLOCK_MICROSECOND_SYSTICK;
+	while (dt) {
+		if (dt < HALF_PERIOD_MICROSECOND) {
+			end = start - CLOCK_MICROSECOND_SYSTICK;
+			dt--;
+		} else {
+			end = start - HALF_PERIOD_SYSTICK;
+			dt -= HALF_PERIOD_MICROSECOND;
+		}
 		
 		if (end < 0) {
 			end += period;
