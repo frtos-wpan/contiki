@@ -128,35 +128,6 @@ clock_delay(unsigned int t)
 	clock_delay_usec(3 * t);
 }
 
-static
-void inner_delay_usec_one(void)
-{
-/*
-	u32 before = STK_VAL;
-	u32 diff = before - CLOCK_MICROSECOND_SYSTICK;
-	if (diff > STK_LOAD) {
-		// TODO -handle wrapping
-	} else {
-		while (STK_VAL > (diff)) {
-			;
-		}
-*/
-	int32_t start = STK_VAL;
-	int32_t end = start - CLOCK_MICROSECOND_SYSTICK;
-	int32_t now;
-
-	if (end < 0) {
-		end += STK_LOAD;
-		do {
-			now = STK_VAL;
-		} while (now <= start || now > end);
-	} else {
-		do {
-			now = STK_VAL;
-		} while (now <= start && now > end);
-	}
-}
-
 /**
  * \brief Arch-specific implementation for libopencm3 targets
  * \param len Delay \e dt uSecs
@@ -167,7 +138,23 @@ void inner_delay_usec_one(void)
 void
 clock_delay_usec(uint16_t dt)
 {
+	int32_t start = STK_VAL;
+	int32_t load = STK_LOAD;
+	int32_t end, now;
+
 	while (dt--) {
-		inner_delay_usec_one();
+		end = start - CLOCK_MICROSECOND_SYSTICK;
+		
+		if (end < 0) {
+			end += load;
+			do {
+				now = STK_VAL;
+			} while (now <= start || now > end);
+		} else {
+			do {
+				now = STK_VAL;
+			} while (now <= start && now > end);
+		}
+		start = end;
 	}
 }
