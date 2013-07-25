@@ -139,14 +139,14 @@ void
 clock_delay_usec(uint16_t dt)
 {
 	int32_t start = STK_VAL;
-	int32_t load = STK_LOAD;
+	int32_t period = STK_LOAD + 1;
 	int32_t end, now;
 
 	while (dt--) {
 		end = start - CLOCK_MICROSECOND_SYSTICK;
 		
 		if (end < 0) {
-			end += load;
+			end += period;
 			do {
 				now = STK_VAL;
 			} while (now <= start || now > end);
