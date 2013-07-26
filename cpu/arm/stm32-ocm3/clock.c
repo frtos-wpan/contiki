@@ -77,13 +77,33 @@ sys_tick_handler(void)
  * \brief Arch-specific implementation of clock_init for libopencm3 target
  * 
  * The user specifies the AHB speed, and we run at div8.  For most cases, AHB
- * speed is equal to sysclock, but could still range from 8Mhz (Default HSI on
- * stm32f100 through to 168Mhz (stm32f4 at max speed)
+ * speed is equal to sysclock, but could still range from 8 MHz (Default HSI on
+ * stm32f100 through to 168 MHz (stm32f4 at max speed)
  */
 
 #define	PERIOD_SYSTICK	((AHB_SPEED / 8 + CLOCK_SECOND - 1) / CLOCK_SECOND)
-#define	HALF_PERIOD_SYSTICK	(PERIOD_SYSTICK / 2)
-#define	HALF_PERIOD_MICROSECOND	(500000 / CLOCK_SECOND)
+
+/*
+ * When waiting in clock_delay_usec, we advance time by one microsecond at a
+ * time if the wait is short. If it's longer, we increase the interval to a
+ * larger fraction of the systick period. We call this a "long" period.
+ *
+ * We use the "long" interval to reduce the accumulation of rounding errors.
+ *
+ * Note that there is a risk: an interrupt running long enough to let the total
+ * wait in a "long" interval exceed the systick counter period will increase
+ * the delay by up to the "long" interval.
+ *
+ * If the systick counter period is 1 ms and the "long" interval is 1/10 the
+ * systick counter period, this would mean one interrupts running for more
+ * than 900 us could cause clock_delay_usec to add an extra 100 us to a wait
+ * that nominally take 100 us or longer.
+ */
+
+#define	LONG_INTERVAL_FRACTION	10	/* systick counter period / 10 */
+#define	LONG_INTERVAL_SYSTICK	(PERIOD_SYSTICK / LONG_INTERVAL_FRACTION)
+#define	LONG_INTERVAL_MICROSECOND \
+    (1000000 / CLOCK_SECOND / LONG_INTERVAL_FRACTION)
 
 void
 clock_init()
@@ -148,12 +168,12 @@ clock_delay_usec(uint16_t dt)
 	int32_t end, now;
 
 	while (dt) {
-		if (dt < HALF_PERIOD_MICROSECOND) {
+		if (dt < LONG_INTERVAL_MICROSECOND) {
 			end = start - CLOCK_MICROSECOND_SYSTICK;
 			dt--;
 		} else {
-			end = start - HALF_PERIOD_SYSTICK;
-			dt -= HALF_PERIOD_MICROSECOND;
+			end = start - LONG_INTERVAL_SYSTICK;
+			dt -= LONG_INTERVAL_MICROSECOND;
 		}
 		
 		if (end < 0) {
