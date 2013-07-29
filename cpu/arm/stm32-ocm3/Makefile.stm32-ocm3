@@ -128,7 +128,9 @@ CUSTOM_RULE_LINK=yes
 	$(AS) -o $(notdir $(<:.S=.o)) $<
 
 %-nosyms.$(TARGET): %.co $(PROJECT_OBJECTFILES) contiki-$(TARGET).a # $(OBJECTDIR)/empty-symbols.o
-	$(CC) $(LDFLAGS) $(CFLAGS) -nostartfiles -o $@ $(filter-out %.a,$^) $(filter %.a,$^) -lc $(filter %.a,$^) $(EXTERN_LIBS)
+	$(TRACE_LD)
+	$(Q)$(CC) $(LDFLAGS) $(CFLAGS) -nostartfiles -o $@ \
+	    $(filter-out %.a,$^) $(filter %.a,$^) -lc $(filter %.a,$^) $(EXTERN_LIBS)
 
 
 %.ihex: %.$(TARGET)
