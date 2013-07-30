@@ -133,27 +133,18 @@ endif
 
 ### Verbosity control. Use  make V=1  to get verbose builds.
 
-#
-# $(VS) goes before the "echo" that displays the short description of the
-# command. The message should be formatted as follows:
-#
-#           11
-#  12345678901
-# "  CC       "
-#  ^ ^ ^
-#  | | Zero or more spaces to pad the the total length to 11 characters
-#  | One or more characters naming or describing the command
-#  Two leading spaces
-# 
-# $(VL) goes before the actual command(s)
-#  
-
 ifeq ($(V),1)
-  VS=@\#	# neither show nor execute the "echo"
-  VL=		# display full invocation
+  TRACE_CC =
+  TRACE_LD =
+  TRACE_AR =
+  TRACE_AS =
+  Q=
 else
-  VS=@		# print the short description
-  VL=@		# invoke without displaying the command
+  TRACE_CC = @echo "  CC       " $<
+  TRACE_LD = @echo "  LD       " $@
+  TRACE_AR = @echo "  AR       " $@
+  TRACE_AS = @echo "  AS       " $<
+  Q=@
 endif
 
 ### Forward comma-separated list of arbitrary defines to the compiler
@@ -213,35 +204,35 @@ distclean: clean
 
 ifndef CUSTOM_RULE_C_TO_CE
 %.ce: %.c
-	$(VS)echo "  CC       " $<
-	$(VL)$(CC) $(CFLAGS) -DAUTOSTART_ENABLE -c $< -o $@
+	$(TRACE_CC)
+	$(Q)$(CC) $(CFLAGS) -DAUTOSTART_ENABLE -c $< -o $@
 	$(STRIP) --strip-unneeded -g -x $@
 endif
 
 ifndef CUSTOM_RULE_C_TO_OBJECTDIR_O
 $(OBJECTDIR)/%.o: %.c | $(OBJECTDIR)
-	$(VS)echo "  CC       " $<
-	$(VL)$(CC) $(CFLAGS) -MMD -c $< -o $@
+	$(TRACE_CC)
+	$(Q)$(CC) $(CFLAGS) -MMD -c $< -o $@
 	@$(FINALIZE_DEPENDENCY)
 endif
 
 ifndef CUSTOM_RULE_S_TO_OBJECTDIR_O
 $(OBJECTDIR)/%.o: %.S | $(OBJECTDIR)
-	$(VS)echo "  AS       " $<
-	$(VL)$(AS) $(ASFLAGS) -o $@ $<
+	$(TRACE_AS)
+	$(Q)$(AS) $(ASFLAGS) -o $@ $<
 endif
 
 ifndef CUSTOM_RULE_C_TO_O
 %.o: %.c
-	$(VS)echo "  CC       " $<
-	$(VL)$(CC) $(CFLAGS) -c $< -o $@
+	$(TRACE_CC)
+	$(Q)$(CC) $(CFLAGS) -c $< -o $@
 endif
 
 
 ifndef CUSTOM_RULE_C_TO_CO
 %.co: %.c
-	$(VS)echo "  CC       " $<
-	$(VL)$(CC) $(CFLAGS) -DAUTOSTART_ENABLE -c $< -o $@
+	$(TRACE_CC)
+	$(Q)$(CC) $(CFLAGS) -DAUTOSTART_ENABLE -c $< -o $@
 endif
 
 ifndef AROPTS
@@ -250,8 +241,8 @@ endif
 
 ifndef CUSTOM_RULE_ALLOBJS_TO_TARGETLIB
 contiki-$(TARGET).a: $(CONTIKI_OBJECTFILES)
-	$(VS)echo "  AR       " $@
-	$(VL)$(AR) $(AROPTS) $@ $^
+	$(TRACE_AR)
+	$(Q)$(AR) $(AROPTS) $@ $^
 endif
 
 ifndef LD
@@ -260,8 +251,8 @@ endif
 
 ifndef CUSTOM_RULE_LINK
 %.$(TARGET): %.co $(PROJECT_OBJECTFILES) $(PROJECT_LIBRARIES) contiki-$(TARGET).a
-	$(VS)echo "  LD       " $@
-	$(VL)$(LD) $(LDFLAGS) $(TARGET_STARTFILES) ${filter-out %.a,$^} \
+	$(TRACE_LD)
+	$(Q)$(LD) $(LDFLAGS) $(TARGET_STARTFILES) ${filter-out %.a,$^} \
 	    ${filter %.a,$^} $(TARGET_LIBFILES) -o $@
 endif
 
