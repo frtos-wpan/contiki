@@ -132,7 +132,6 @@ CUSTOM_RULE_LINK=yes
 	$(Q)$(CC) $(LDFLAGS) $(CFLAGS) -nostartfiles -o $@ \
 	    $(filter-out %.a,$^) $(filter %.a,$^) -lc $(filter %.a,$^) $(EXTERN_LIBS)
 
-
 %.ihex: %.$(TARGET)
 	$(OBJCOPY) $^ -O ihex $@
 
