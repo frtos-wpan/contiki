@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2010, Mariano Alvira <mar@devl.org> and other contributors
- * to the MC1322x project (http://mc1322x.devl.org) and Contiki.
+ * Copyright (c) 2013, IDentification Automation Laboratory
+ * IDALab (http://www.idalab.unisalento.it)
+ * Department of Innovation Engineering - University of Salento
  *
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -28,44 +29,26 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This file is part of the Contiki OS.
- *
- *
  */
 
-#include "dev/watchdog.h"
-#include <mc1322x.h>
-#include <board.h>
+/**
+ * \file  i2c.h
+ * \brief I2C bus master driver for mbxxx platform.
+ * \author Maria Laura Stefanizzi <laura28582@gmail.com>
+ * \date   2013-11-20
+ */
+#ifndef I2C_H
+#define I2C_H
 
-/*---------------------------------------------------------------------------*/
-void
-watchdog_init(void)
-{
-  cop_timeout_ms(1000);
-}
-/*---------------------------------------------------------------------------*/
-void
-watchdog_start(void)
-{
-  CRM->COP_CNTLbits.COP_EN = 1;
-}
-/*---------------------------------------------------------------------------*/
-void
-watchdog_periodic(void)
-{
-  cop_service();
-}
-/*---------------------------------------------------------------------------*/
-void
-watchdog_stop(void)
-{
-  CRM->COP_CNTLbits.COP_EN = 0;
-}
-/*---------------------------------------------------------------------------*/
-void
-watchdog_reboot(void)
-{
-  watchdog_start();
-  while(1);
-}
-/*---------------------------------------------------------------------------*/
+#define SC2_STAT(FLAG) (SC2_TWISTAT & FLAG)
+
+void i2c_enable(void);
+void i2c_disable(void);
+void i2c_start(void);
+void i2c_stop(void);
+
+void i2c_write(uint8_t data);
+uint8_t i2c_read(int ack);
+
+#endif /* I2C_H */
+
