@@ -5,7 +5,7 @@ TESTS = one-timer one-cancel \
 .PHONY:	test clean
 
 test:
-	for n in $(TESTS); do ./$$n || exit; done
+	for n in $(TESTS); do NAME=$$n ./$$n || exit; done
 
 clean:
 	rm -f _out _ref _tmp

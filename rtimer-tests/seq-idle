@@ -7,7 +7,7 @@
 #----- New timer expires first ------------------------------------------------
 
 
-./run "seq-idle: new timer expires first" <<EOF
+./run "new timer expires first" <<EOF
 vars:
 	static int timers;
 init:
@@ -25,7 +25,7 @@ EOF
 #----- New timer expires last -------------------------------------------------
 
 
-./run "seq-idle: new timer expires last" <<EOF
+./run "new timer expires last" <<EOF
 vars:
 	static int timers;
 init:
@@ -43,7 +43,7 @@ EOF
 #----- New timer expires in the past ------------------------------------------
 
 
-./run "seq-idle: new timer expires in the past" <<EOF
+./run "new timer expires in the past" <<EOF
 vars:
 	static int timers;
 init:

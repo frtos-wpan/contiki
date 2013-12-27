@@ -6,7 +6,7 @@
 #----- Reschedule in init, expire later ---------------------------------------
 
 
-./run "resched: in init, make later" <<EOF
+./run "in init, make later" <<EOF
 init:
 	RA(100);
 	RA(120);
@@ -18,7 +18,7 @@ EOF
 #----- Reschedule in init, expire sooner --------------------------------------
 
 
-./run "resched: in init, make sooner" <<EOF
+./run "in init, make sooner" <<EOF
 init:
 	RA(120);
 	RA(100);
@@ -31,7 +31,7 @@ EOF
 #----- Reschedule from handler, expire later ----------------------------------
 
 
-./run "resched: in handler, make later" <<EOF
+./run "in handler, make later" <<EOF
 init:
 	RA(100);
 	RB(110);
@@ -46,7 +46,7 @@ EOF
 #----- Reschedule from handler, expire sooner ---------------------------------
 
 
-./run "resched: in handler, make later" <<EOF
+./run "in handler, make later" <<EOF
 init:
 	RA(100);
 	RB(120);
@@ -61,7 +61,7 @@ EOF
 #----- Reschedule from handler, expire in the past ----------------------------
 
 
-./run "resched: in handler, in the past" <<EOF
+./run "in handler, in the past" <<EOF
 init:
 	RA(110);
 	RB(120);
@@ -76,7 +76,7 @@ EOF
 #----- Reschedule from interrupt, expire later --------------------------------
 
 
-./run "resched: in interrupt, make later" <<EOF
+./run "in interrupt, make later" <<EOF
 init:
 	RA(100);
 probe:
@@ -100,7 +100,7 @@ EOF
 #----- Reschedule from interrupt, expire earlier ------------------------------
 
 
-./run "resched: in interrupt, make sooner" <<EOF
+./run "in interrupt, make sooner" <<EOF
 init:
 	RAx(120);
 probe:
@@ -125,7 +125,7 @@ EOF
 #----- Reschedule from interrupt, expire in the past --------------------------
 
 
-./run "resched: in interrupt, in the past" <<EOF
+./run "in interrupt, in the past" <<EOF
 init:
 	RAx(120);
 	advance(110);

@@ -5,7 +5,7 @@
 
 #----- Cancel at start --------------------------------------------------------
 
-./run "one timer, cancelled at start" <<EOF
+./run "cancelled at start" <<EOF
 init:
 	RA(100);
 	CA;
@@ -15,7 +15,7 @@ EOF
 
 #----- Cancel anytime ---------------------------------------------------------
 
-./run "one timer, cancelled anytime" <<EOF
+./run "cancelled anytime" <<EOF
 init:
 	RA(100);
 probe:
@@ -42,4 +42,3 @@ EOF
 #   be run. Note that, since we don't have true atomicity, such an indication
 #   would also be unreliable.
 #
-

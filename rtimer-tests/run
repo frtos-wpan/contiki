@@ -9,7 +9,7 @@ PROBE_ACTION=
 #PROBE_COUNT=$2
 EXPECT=
  
-echo "$1"
+echo "${NAME:+$NAME:}" "$1"
 
 var=
 while read s; do

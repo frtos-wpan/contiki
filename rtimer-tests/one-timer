@@ -6,7 +6,7 @@
 #----- Fire in idle -----------------------------------------------------------
 
 
-./run "one timer, firing in idle" <<EOF
+./run "firing in idle" <<EOF
 init:
 	RA(100);
 expect:
@@ -17,7 +17,7 @@ EOF
 #----- Fire from interrupt ----------------------------------------------------
 
 
-./run "one timer, fired by interrupt" <<EOF
+./run "fired by interrupt" <<EOF
 init:
 	RA(100);
 probe:
