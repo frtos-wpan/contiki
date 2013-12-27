@@ -134,7 +134,7 @@ static void probe(unsigned here)
 {
 	if (here != pos)
 		return;
-	if (--count)
+	if (count--)
 		return;
 //	printf("P");
 	{ PROBE_ACTION }
@@ -217,7 +217,7 @@ int main(int argc, char **argv)
 			count = c;
 			run_sim();
 			printf(" # %u %d\n", pos, c);
-			if (c > 0)
+			if (count >= 0)
 				break;
 			c++;
 		}
