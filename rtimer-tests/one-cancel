@@ -1,0 +1,45 @@
+#!/bin/sh -e
+#
+# One timer, cancelled
+#
+
+#----- Cancel at start --------------------------------------------------------
+
+./run "one timer, cancelled at start" <<EOF
+init:
+	RA(100);
+	CA;
+expect:
+	S(A,100)C(A)
+EOF
+
+#----- Cancel anytime ---------------------------------------------------------
+
+./run "one timer, cancelled anytime" <<EOF
+init:
+	RA(100);
+probe:
+	CA;
+expect:
+	C(A)S(A,100)T(A,100)
+	S(A,100)C(A)
+	S(A,100)C(A)T(A,100)	# wrong, see below
+	S(A,100)T(A,100)
+	S(A,100)T(A,100)C(A)
+	S(A,100C(A))
+	S(A,100C(A))T(A,100)
+EOF
+
+#
+# We can't guarantee that cancellation is truly atomic. Thus, when an interrupt
+# cancels a timer that is just about to run, rtimer_cancel will return but the
+# timer handler will run after returning from the interrupt.
+#
+# What we can either
+# - let the user check rtimer->cancel if cancellation from an interrupt has to
+#   be properly synchronized, or
+# - make rtimer_cancel return an indication whether the timer handler may still
+#   be run. Note that, since we don't have true atomicity, such an indication
+#   would also be unreliable.
+#
+

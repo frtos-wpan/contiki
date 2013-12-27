@@ -1,0 +1,58 @@
+#!/bin/sh -e
+#
+# Two timers, one fires a subsequent timer, rtimer_run_next is only called
+# when idle (no races).
+#
+
+#----- New timer expires first ------------------------------------------------
+
+
+./run "seq-idle: new timer expires first" <<EOF
+vars:
+	static int timers;
+init:
+	timers = 1;
+	RA(100);
+	RB(120);
+handler:
+	if (!--timers)
+		RA(110);
+expect:
+	S(A,100)S(B,120)T(A,100S(A,110))T(A,110)T(B,120)
+EOF
+
+
+#----- New timer expires last -------------------------------------------------
+
+
+./run "seq-idle: new timer expires last" <<EOF
+vars:
+	static int timers;
+init:
+	timers = 1;
+	RA(100);
+	RB(120);
+handler:
+	if (!--timers)
+		RA(130);
+expect:
+	S(A,100)S(B,120)T(A,100S(A,130))T(B,120)T(A,130)
+EOF
+
+
+#----- New timer expires in the past ------------------------------------------
+
+
+./run "seq-idle: new timer expires in the past" <<EOF
+vars:
+	static int timers;
+init:
+	timers = 1;
+	RA(100);
+	RB(120);
+handler:
+	if (!--timers)
+		RA(90);
+expect:
+	S(A,100)S(B,120)T(A,100S(A,90))T(A,100)T(B,120)
+EOF
