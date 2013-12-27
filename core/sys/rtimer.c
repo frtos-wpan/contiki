@@ -60,6 +60,8 @@
 static struct rtimer *next_rtimer;
 static volatile bool locked = 0;	/* timer list is locked */
 static volatile bool deferred = 0;	/* run a timer after unlocking */
+static struct rtimer *set_queue;	/* for delayed setting */
+static volatile bool setting = 0;	/* processing set_queue */
 
 
 /*---------------------------------------------------------------------------*/
@@ -155,12 +157,44 @@ next_timer_locked(void)
 static void
 run_deferred(void)
 {
+  struct rtimer *rtimer;
+
+again:
   while(deferred) {
     locked = 1;
     deferred = 0;
     next_timer_locked();
     locked = 0;
   }
+  if(setting) {
+    return;
+  }
+  if(set_queue) {
+    setting = 1;
+    rtimer = set_queue;
+    set_queue = rtimer->more;
+    setting = 0;
+    locked = 1;
+    if(!rtimer->set_cancel) {
+      set_locked(rtimer, rtimer->set_time, rtimer->set_func, rtimer->set_ptr);
+    }
+    locked = 0;
+    goto again;
+  }
+}
+/*---------------------------------------------------------------------------*/
+static void
+maybe_queue_rtimer(struct rtimer *rtimer)
+{
+  const struct rtimer *t;
+
+  for(t = set_queue; t; t = t->more) {
+    if(t == rtimer) {
+      return;
+    }
+  }
+  rtimer->more = set_queue;
+  set_queue = rtimer;
 }
 /*---------------------------------------------------------------------------*/
 int
@@ -173,9 +207,16 @@ rtimer_set(struct rtimer *rtimer, rtimer_clock_t time,
   PRINTF("rtimer_set time %d\n", time);
 
   if(locked) {
-    res = set_locked(rtimer, time, func, ptr);
+    rtimer->cancel = 1;
+    rtimer->set_time = time;
+    rtimer->set_func = func;
+    rtimer->set_ptr = ptr;
+    rtimer->set_cancel = 0;
+    maybe_queue_rtimer(rtimer);
+    return RTIMER_OK;
   } else {
     locked = 1;
+    rtimer->set_cancel = 1; /* preserve ordering */
     res = set_locked(rtimer, time, func, ptr);
     locked = 0;
     run_deferred();
@@ -186,6 +227,7 @@ rtimer_set(struct rtimer *rtimer, rtimer_clock_t time,
 void
 rtimer_cancel(struct rtimer *rtimer)
 {
+  rtimer->set_cancel = 1;
   rtimer->cancel = 1;
 }
 /*---------------------------------------------------------------------------*/
@@ -197,7 +239,6 @@ rtimer_run_next(void)
     return;
   }
 
-  /* lock just to make sure ... */
   locked = 1;
   next_timer_locked();
   locked = 0;
