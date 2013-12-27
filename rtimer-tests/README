@@ -1,0 +1,116 @@
+rtimer tests
+============
+
+This is a simple regression test system for rtimers. It can simulate
+the use of the rtimer system with one interrupt firing at an arbitrary
+time and it has an automatic timer interrupt that fires when the
+system is idle.
+
+
+Simulation concept
+------------------
+
+Tests are made by setting up and environment using rtimers and then
+simulating the effect of the passing of time and/or the execution of
+interrupts.
+
+Interrupts are simulated by inserting calls to a probe functions
+between lines of the original code. The simulator then performs various
+runs activating a different probe point in each. If a probe is visited
+multiple times, the simulator iterated through them as well.
+
+This way the probe function acts like an interrupt that can fire once
+at any moment during the simulation run.
+
+The results of all runs are collected and then compares with the
+expected outcomes specified in the simulation setup.
+
+
+Simulation setup
+----------------
+
+A test case if generated and executed by running the script "run".
+"run" accepts a description of the test as argument. The definition of
+the simulation and the expected results is passed on standard input.
+
+The following example illustrates the use of "run":
+
+
+./run "one timer, firing in idle" <<EOF
+init:
+        RA(100);
+expect:
+        S(A,100)T(A,100)
+EOF
+
+
+The simulation is defined in various sections. A section begins with
+its name followed by a colon and then any number of lines with the
+content of the section. The content must be indented.
+
+The "init" section specifies the commands to execute at the beginning
+of the simulation. The "expect" section specifies the expected result.
+
+Additional sections are "vars" (declaration of global variables used
+by the simulation - note that they have to be explicitly initialized
+in the "init" section), "handler" is the code to execute in the timer
+handler, and "probe" is the code to execute in the probe function.
+
+All these code snippets are executed "atomically" but the functions
+they call may invoke the probe function.
+
+
+Helper functions
+----------------
+
+The simulation environment provides a number of helper functions and
+macros for common tasks:
+
+- RA(t): this is a wrapper for rtimer_set. It starts or restarts rtimer
+  "A" for time "t". There are three such pre-defined rtimers - A, B,
+  and C - and a starter function for each.
+
+- RAx(t): like RA(t), but varies the "ptr" argument. The "ptr" argument
+  can be x, y, or z. RAx, etc., produce output that is not as nice to
+  read as the output of RA but allow distinguishing different rtimer
+  invocations in cases where the time alone is not a clear enough
+  indication.
+
+- CA: cancel rtimer A.
+
+- advance(t): advance the simulation time to "t" and run the timer
+  handler if it is due.
+
+
+Output format
+-------------
+
+Each simulation run produces a single line of text that describes the
+events that occurred in the simulation:
+
+- S(A,t*): start/restart of rtimer "A" for time "t". If any events occur
+  between the invocation ("S(A,t") and the return from rtimer_set (")"),
+  they are logged in the space indicated with "*".
+
+- Sx(A,t*): the some for RAx(t)
+
+- C(A*): cancellation of rtimer "A"
+
+- T(A,t*): expiration of rtimer "A" at then current time "t". Events that
+  occur while executing the handler are shown at "*".
+
+- Tx(A,t*): the same of RAx(t)
+
+Output lines are sorted and duplicate lines are removed. The result is
+then compared to the output specified in the "expect" section.
+
+
+Analyzing results
+-----------------
+
+The simulation writes the raw output to _tmp. Each line contains one
+run followed by the number of the probe that was used and the number
+of the iteration in which it was invoked.
+
+The location of a probe can be found by looking in the file _rtimer for
+the corresponding call to probe(N).

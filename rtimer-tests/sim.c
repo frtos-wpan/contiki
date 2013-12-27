@@ -6,6 +6,15 @@
 
 #define	PRINTF(...)
 
+
+/* ----- Helper functions for simulations ---------------------------------- */
+
+ 
+static struct rtimer ra, rb, rc;
+static char pa, pb, pc;
+static char px = 'x', py = 'y', pz = 'z';
+
+
 #define	__R(x, r, t, p)				\
 	{ printf("S(" x ",%u", t);		\
 	  rtimer_set(r, t, 0, handler, p);	\
@@ -37,6 +46,9 @@
 #define	CC	__C("A", &rc)
 
 
+/* ----- Inclusion of the instrumented rtimer code ------------------------- */
+
+
 unsigned short rtimer_arch_now(void);
 
 static void probe(unsigned here);
@@ -45,10 +57,6 @@ static void advance(unsigned t);
 
 #include "_rtimer"
 
-
-static struct rtimer ra, rb, rc;
-static char pa, pb, pc;
-static char px = 'x', py = 'y', pz = 'z';
 
 VARS
 

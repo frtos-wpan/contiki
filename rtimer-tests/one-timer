@@ -9,8 +9,6 @@
 ./run "one timer, firing in idle" <<EOF
 init:
 	RA(100);
-probe:
-	rtimer_run_next();
 expect:
 	S(A,100)T(A,100)
 EOF
