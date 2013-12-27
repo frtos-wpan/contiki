@@ -45,7 +45,7 @@ while read s; do
 #		continue
 #	fi
 	if [ "`eval echo -n \"\\$$var\"`" ]; then
-		eval "$var=\"\$$var $s\""
+		eval "$var=\"\$$var \$s\""
 	else
 		eval "$var=\$s"
 	fi
