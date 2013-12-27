@@ -1,0 +1,72 @@
+#!/bin/sh
+RT=../core/sys/rtimer.c
+
+VARS=
+INIT_ACTION=
+HANDLER_ACTION=
+PROBE_ACTION=
+#PROBE_POS=$1
+#PROBE_COUNT=$2
+EXPECT=
+ 
+echo "$1"
+
+var=
+while read s; do
+	s=${s%%#*}
+	s=`echo "$s" | sed 's/[\t ]*$//'`
+	[ "$s" ] || continue
+	if [ "$s" = "vars:" ]; then
+		var=VARS
+		continue
+	fi
+	if [ "$s" = "init:" ]; then
+		var=INIT_ACTION
+		continue
+	fi
+	if [ "$s" = "handler:" ]; then
+		var=HANDLER_ACTION
+		continue
+	fi
+	if [ "$s" = "probe:" ]; then
+		var=PROBE_ACTION
+		continue
+	fi
+	if [ "$s" = "expect:" ]; then
+		var=EXPECT
+		continue
+	fi
+#	if [ "${s#pos=}" != "$s" ]; then
+#		PROBE_POS=${s#pos=}
+#		continue
+#	fi
+#	if [ "${s#count=}" != "$s" ]; then
+#		PROBE_COUNT=${s#count=}
+#		continue
+#	fi
+	if [ "`eval echo -n \"\\$$var\"`" ]; then
+		eval "$var=\"\$$var $s\""
+	else
+		eval "$var=\$s"
+	fi
+done
+
+cpp -w -fpreprocessed $RT | ./instr.pl >_rtimer || exit
+gcc -g -Wall -Iinclude \
+    -DVARS="$VARS" \
+    -DINIT_ACTION="$INIT_ACTION" \
+    -DHANDLER_ACTION="$HANDLER_ACTION" \
+    -DPROBE_ACTION="$PROBE_ACTION" \
+    -o _sim sim.c || exit
+
+./_sim >_tmp || exit
+
+sed 's/ #.*//' _tmp | sort | uniq >_out
+
+echo "$EXPECT" | tr ' ' '\12' | sort >_ref
+if [ "`cat _ref`" != "`uniq _ref`" ]; then
+	echo "expect: duplicate line" 1>&2
+	exit 1
+fi
+
+diff -u _ref _out 1>&2
