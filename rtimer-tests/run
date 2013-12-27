@@ -51,8 +51,14 @@ while read s; do
 	fi
 done
 
-cpp -w -fpreprocessed $RT | ./instr.pl >_rtimer || exit
-gcc -g -Wall -Iinclude \
+opts=
+if [ "$cov" ]; then
+	opts="-fprofile-arcs -ftest-coverage"
+	rm -f sim.gcda sim.gcno
+fi
+
+cpp -w -fpreprocessed -P $RT | ./instr.pl >_rtimer || exit
+gcc $opts -g -Wall -Iinclude \
     -DVARS="$VARS" \
     -DINIT_ACTION="$INIT_ACTION" \
     -DHANDLER_ACTION="$HANDLER_ACTION" \
@@ -69,4 +75,9 @@ if [ "`cat _ref`" != "`uniq _ref`" ]; then
 	exit 1
 fi
 
-diff -u _ref _out 1>&2
+diff -u _ref _out 1>&2 || exit
+
+if [ "$cov" ]; then
+	gcov sim.c >/dev/null
+	cat _rtimer.gcov >>"$cov"
+fi
