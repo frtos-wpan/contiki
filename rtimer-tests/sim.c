@@ -180,7 +180,12 @@ int main(int argc, char **argv)
 	if (argc != 1)
 		usage(*argv);
 
-	for (pos = 0; pos != PROBE_POSITIONS; pos++) {
+	/*
+	 * We skip probe 0 because that would be in rtimer_init right before
+	 * calling rtimer_arch_init. This is an invalid usage scenario that
+	 * produces weird results that may mask real issues.
+	 */
+	for (pos = 1; pos < PROBE_POSITIONS; pos++) {
 		c = 0;
 		while (1) {
 			count = c;
