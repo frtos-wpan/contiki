@@ -59,6 +59,10 @@ handler, and "probe" is the code to execute in the probe function.
 All these code snippets are executed "atomically" but the functions
 they call may invoke the probe function.
 
+Sections can contain comments beginning with a hash mark (#). These
+comments are removed before further processing. This is mainly useful
+for marking individual lines of "expect" sections.
+
 
 Helper functions
 ----------------
@@ -114,3 +118,15 @@ of the iteration in which it was invoked.
 
 The location of a probe can be found by looking in the file _rtimer for
 the corresponding call to probe(N).
+
+
+Issues found
+------------
+
+When an rtimer is reschedule or cancelled from an interrupt, the original
+timer handler may still be executed after the call to rtimer_set or
+rtimer_cancel returns. This is unavoidable because we have no means of
+deferring the return to the interrupt handler until the timer handler has
+executed.
+
+For more details, see the comments in the files "one-cancel" and "resched".
