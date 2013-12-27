@@ -14,6 +14,20 @@
 #define	RB(t)	__R("B", &rb, t, &pb)
 #define	RC(t)	__R("C", &rc, t, &pc)
 
+#define	__Rx(x, r, t, p)				\
+	{ printf("S%c(" x ",%u", *p, t);		\
+	  rtimer_set(r, t, 0, handler, p);	\
+	  printf(")"); }
+#define	RAx(t)	__Rx("A", &ra, t, &px)
+#define	RAy(t)	__Rx("A", &ra, t, &py)
+#define	RAz(t)	__Rx("A", &ra, t, &pz)
+#define	RBx(t)	__Rx("B", &rb, t, &px)
+#define	RBy(t)	__Rx("B", &rb, t, &py)
+#define	RBz(t)	__Rx("B", &rb, t, &pz)
+#define	RCx(t)	__Rx("C", &rc, t, &px)
+#define	RCy(t)	__Rx("C", &rc, t, &py)
+#define	RCz(t)	__Rx("C", &rc, t, &pz)
+
 #define	__C(x, r)		\
 	{ printf("C(" x);	\
 	  rtimer_cancel(r);	\
@@ -34,6 +48,7 @@ static void advance(unsigned t);
 
 static struct rtimer ra, rb, rc;
 static char pa, pb, pc;
+static char px = 'x', py = 'y', pz = 'z';
 
 VARS
 
@@ -83,13 +98,18 @@ static char id(void *x, void *a, void *b, void *c)
 static void handler(struct rtimer *rt, void *ptr)
 {
 	char rx = id(rt, &ra, &rb, &rc);
-	char px = id(ptr, &pa, &pb, &pc);
+	char p = id(ptr, &px, &py, &pz);
 
-	if (rx != px) {
-		fprintf(stderr, "R%c with ptr %c\n", rx, px);
-		exit(1);
+	if (p == '?') {
+		p = id(ptr, &pa, &pb, &pc);
+		if (rx != p) {
+			fprintf(stderr, "R%c with ptr %c\n", rx, p);
+			exit(1);
+		}
+		printf("T(%c,%u", rx, now);
+	} else {
+		printf("T%c(%c,%u", *(char *) ptr, rx, now);
 	}
-	printf("T(%c,%u", rx, now);
 	{ HANDLER_ACTION }
 	printf(")");
 }
