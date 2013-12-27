@@ -1,4 +1,5 @@
 TESTS = one-timer one-cancel \
+	resched \
 	seq-idle
 
 .PHONY:	test clean

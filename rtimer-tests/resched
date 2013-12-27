@@ -1,0 +1,144 @@
+#!/bin/sh -e
+#
+# One or two timers, one gets rescheduled.
+#
+
+#----- Reschedule in init, expire later ---------------------------------------
+
+
+./run "resched: in init, make later" <<EOF
+init:
+	RA(100);
+	RA(120);
+expect:
+	S(A,100)S(A,120)T(A,120)
+EOF
+
+
+#----- Reschedule in init, expire sooner --------------------------------------
+
+
+./run "resched: in init, make sooner" <<EOF
+init:
+	RA(120);
+	RA(100);
+expect:
+	S(A,120)S(A,100)T(A,100)
+EOF
+
+
+
+#----- Reschedule from handler, expire later ----------------------------------
+
+
+./run "resched: in handler, make later" <<EOF
+init:
+	RA(100);
+	RB(110);
+handler:
+	if (rt == &ra)
+		RB(120);
+expect:
+	S(A,100)S(B,110)T(A,100S(B,120))T(B,120)
+EOF
+
+
+#----- Reschedule from handler, expire sooner ---------------------------------
+
+
+./run "resched: in handler, make later" <<EOF
+init:
+	RA(100);
+	RB(120);
+handler:
+	if (rt == &ra)
+		RB(110);
+expect:
+	S(A,100)S(B,120)T(A,100S(B,110))T(B,110)
+EOF
+
+
+#----- Reschedule from handler, expire in the past ----------------------------
+
+
+./run "resched: in handler, in the past" <<EOF
+init:
+	RA(110);
+	RB(120);
+handler:
+	if (rt == &ra)
+		RB(100);
+expect:
+	S(A,110)S(B,120)T(A,110S(B,100))T(B,110)
+EOF
+
+
+#----- Reschedule from interrupt, expire later --------------------------------
+
+
+./run "resched: in interrupt, make later" <<EOF
+init:
+	RA(100);
+probe:
+	RA(120);
+expect:
+	S(A,100)S(A,120)T(A,100)T(A,120)	# see below
+	S(A,100)S(A,120)T(A,120)
+	S(A,100)T(A,100)
+	S(A,100)T(A,100)S(A,120)T(A,120)
+	S(A,100S(A,120))T(A,100)
+	S(A,100S(A,120))T(A,120)
+	S(A,120)S(A,100)T(A,100)
+EOF
+
+#
+# This is once again the issue of the handler being about to be run. We
+# can't prevent this.
+#
+
+
+#----- Reschedule from interrupt, expire earlier ------------------------------
+
+
+./run "resched: in interrupt, make sooner" <<EOF
+init:
+	RAx(120);
+probe:
+	RAy(110);
+expect:
+	Sx(A,120)Sy(A,110)Tx(A,120)Ty(A,120)	# see below
+	Sx(A,120)Sy(A,110)Ty(A,120)
+	Sx(A,120)Sy(A,110Ty(A,120))
+	Sx(A,120)Tx(A,120)
+	Sx(A,120)Tx(A,120)Sy(A,110)Ty(A,120)
+	Sx(A,120)Tx(A,120)Sy(A,110Ty(A,120))
+	Sx(A,120Sy(A,110))Tx(A,120)
+	Sx(A,120Sy(A,110))Ty(A,110)
+	Sy(A,110)Sx(A,120)Tx(A,120)
+EOF
+
+#
+# Timer about to run, yet again.
+#
+
+
+#----- Reschedule from interrupt, expire in the past --------------------------
+
+
+./run "resched: in interrupt, in the past" <<EOF
+init:
+	RAx(120);
+	advance(110);
+probe:
+	RAy(100);
+expect:
+	Sx(A,120)Sy(A,100)Tx(A,120)Ty(A,120)
+	Sx(A,120)Sy(A,100)Ty(A,120)
+	Sx(A,120)Sy(A,100Ty(A,120))
+	Sx(A,120)Tx(A,120)
+	Sx(A,120)Tx(A,120)Sy(A,100)Ty(A,120)
+	Sx(A,120)Tx(A,120)Sy(A,100Ty(A,120))
+	Sx(A,120Sy(A,100))Tx(A,120)
+	Sx(A,120Sy(A,100))Ty(A,110)
+	Sy(A,100)Sx(A,120)Tx(A,120)
+EOF
