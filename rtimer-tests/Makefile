@@ -6,7 +6,8 @@ TESTS = one-timer one-cancel \
 
 test:
 	>_cov
-	for n in $(TESTS); do NAME=$$n cov=_cov ./$$n || exit; done
+	for n in $(TESTS); do NAME=$$n cov=_cov ./$$n || exit; done; \
+	    echo "Passed all `grep -c :Source: _cov` tests"
 
 cov:
 	./merge.pl _cov
