@@ -155,6 +155,17 @@ next_timer_locked(void)
 }
 /*---------------------------------------------------------------------------*/
 static void
+lock_and_set(struct rtimer *rtimer, rtimer_clock_t time,
+	     rtimer_callback_t func, void *ptr)
+{
+  locked = 1;
+  if(!rtimer->set_cancel) {
+    set_locked(rtimer, time, func, ptr);
+  }
+  locked = 0;
+}
+/*---------------------------------------------------------------------------*/
+static void
 run_deferred(void)
 {
   struct rtimer *rtimer;
@@ -169,16 +180,19 @@ again:
   if(setting) {
     return;
   }
-  if(set_queue) {
-    setting = 1;
-    rtimer = set_queue;
+  setting = 1;
+  rtimer = set_queue;
+  if(rtimer) {
     set_queue = rtimer->more;
-    setting = 0;
-    locked = 1;
-    if(!rtimer->set_cancel) {
-      set_locked(rtimer, rtimer->set_time, rtimer->set_func, rtimer->set_ptr);
-    }
-    locked = 0;
+  }
+  setting = 0;
+  if(rtimer) {
+    /*
+     * This function call copies the new set_* values from rtimer before
+     * locking, thus ensuring they are not changed by another call to
+     * rtimer_set while we are in the middle of processing them.
+     */
+    lock_and_set(rtimer, rtimer->set_time, rtimer->set_func, rtimer->set_ptr);
     goto again;
   }
 }
