@@ -45,6 +45,7 @@
  */
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "sys/rtimer.h"
 #include "contiki.h"
@@ -63,6 +64,12 @@ static volatile bool deferred = 0;	/* run a timer after unlocking */
 static struct rtimer *set_queue[2];	/* for delayed setting */
 static volatile bool setting = 0;	/* processing set_queue */
 static volatile bool nesting = 0;	/* nesting depth for set_queue */
+
+/*
+ * Note that read accesses to the generation count must be atomic but neither
+ * writes nor the increment operation have to.
+ */
+static volatile uint8_t generation = 0;
 
 
 /*---------------------------------------------------------------------------*/
@@ -230,15 +237,19 @@ rtimer_set(struct rtimer *rtimer, rtimer_clock_t time,
 	   rtimer_clock_t duration,
 	   rtimer_callback_t func, void *ptr)
 {
+  uint8_t start;
   int res;
 
   PRINTF("rtimer_set time %d\n", time);
 
   if(locked) {
     rtimer->cancel = 1;
-    rtimer->set_time = time;
-    rtimer->set_func = func;
-    rtimer->set_ptr = ptr;
+    do {
+      start = generation;
+      rtimer->set_time = time;
+      rtimer->set_func = func;
+      rtimer->set_ptr = ptr;
+    } while(start != generation++);
     rtimer->set_cancel = 0;
     maybe_queue_rtimer(rtimer);
     return RTIMER_OK;
