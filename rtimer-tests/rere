@@ -3,10 +3,10 @@
 # Timer gets re-submitted by handler and re-scheduled by interrupt
 #
 
-#----- Reschedule in init, expire later ---------------------------------------
+#----- Resubmit from handler, reschedule from probe ---------------------------
 
 
-./run "in init, make later" <<EOF
+./run "resubmit, reschedule" <<EOF
 init:
 	RAx(100);
 handler:
@@ -26,4 +26,54 @@ expect:
 	Sx(A,100Sz(A,120))Tx(A,100Sy(A,110))Ty(A,110)
 	Sx(A,100Sz(A,120))Tz(A,120)
 	Sz(A,120)Sx(A,100)Tx(A,100Sy(A,110))Ty(A,110)
+EOF
+
+
+#----- Resubmit from handler, reschedule twice from probe ---------------------
+
+
+./run "resubmit, reschedule twice" <<EOF
+init:
+	RAx(100);
+handler:
+	if (rt->time == 100)
+		RAy(110);
+probe:
+	RAz(120);
+	RAx(130);
+expect:
+	Sx(A,100)Sz(A,120)Sx(A,130)Tx(A,100Sy(A,110))Ty(A,110)
+	Sx(A,100)Sz(A,120)Sx(A,130)Tx(A,130)
+	Sx(A,100)Tx(A,100Sy(A,110))Sz(A,120)Sx(A,130)Tx(A,130)
+	Sx(A,100)Tx(A,100Sy(A,110))Sz(A,120)Sx(A,130)Ty(A,110)Tx(A,130)
+	Sx(A,100)Tx(A,100Sy(A,110))Ty(A,110)
+	Sx(A,100)Tx(A,100Sy(A,110))Ty(A,110)Sz(A,120)Sx(A,130)Tx(A,130)
+	Sx(A,100)Tx(A,100Sy(A,110Sz(A,120)Sx(A,130)))Tx(A,130)
+	Sx(A,100)Tx(A,100Sy(A,110Sz(A,120)Sx(A,130)))Ty(A,110)
+	Sx(A,100Sz(A,120)Sx(A,130))Tx(A,100Sy(A,110))Ty(A,110)
+	Sx(A,100Sz(A,120)Sx(A,130))Tx(A,130)
+	Sz(A,120)Sx(A,130)Sx(A,100)Tx(A,100Sy(A,110))Ty(A,110)
+EOF
+
+
+#----- Resubmit from handler, schedule from probe -----------------------------
+
+
+./run "resubmit, schedule two" <<EOF
+init:
+	RAx(100);
+handler:
+	if (rt->time == 100)
+		RAy(110);
+probe:
+	RBx(120);
+	RCy(130);
+expect:
+	Sx(A,100)Sx(B,120)Sy(C,130)Tx(A,100Sy(A,110))Ty(A,110)Tx(B,120)Ty(C,130)
+	Sx(A,100)Tx(A,100Sy(A,110))Sx(B,120)Sy(C,130)Ty(A,110)Tx(B,120)Ty(C,130)
+	Sx(A,100)Tx(A,100Sy(A,110))Ty(A,110)
+	Sx(A,100)Tx(A,100Sy(A,110))Ty(A,110)Sx(B,120)Sy(C,130)Tx(B,120)Ty(C,130)
+	Sx(A,100)Tx(A,100Sy(A,110Sx(B,120)Sy(C,130)))Ty(A,110)Tx(B,120)Ty(C,130)
+	Sx(A,100Sx(B,120)Sy(C,130))Tx(A,100Sy(A,110))Ty(A,110)Tx(B,120)Ty(C,130)
+	Sx(B,120)Sy(C,130)Sx(A,100)Tx(A,100Sy(A,110))Ty(A,110)Tx(B,120)Ty(C,130)
 EOF
