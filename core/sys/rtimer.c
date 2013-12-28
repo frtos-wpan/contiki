@@ -60,8 +60,9 @@
 static struct rtimer *next_rtimer;
 static volatile bool locked = 0;	/* timer list is locked */
 static volatile bool deferred = 0;	/* run a timer after unlocking */
-static struct rtimer *set_queue;	/* for delayed setting */
+static struct rtimer *set_queue[2];	/* for delayed setting */
 static volatile bool setting = 0;	/* processing set_queue */
+static volatile bool nesting = 0;	/* nesting depth for set_queue */
 
 
 /*---------------------------------------------------------------------------*/
@@ -181,9 +182,14 @@ again:
     return;
   }
   setting = 1;
-  rtimer = set_queue;
+  rtimer = set_queue[0];
   if(rtimer) {
-    set_queue = rtimer->more;
+    set_queue[0] = rtimer->more[0];
+  } else {
+    rtimer = set_queue[1];
+    if(rtimer) {
+      set_queue[1] = rtimer->more[1];
+    }
   }
   setting = 0;
   if(rtimer) {
@@ -197,18 +203,26 @@ again:
   }
 }
 /*---------------------------------------------------------------------------*/
+/*
+ * We only come here if we're already in an interrupt. Since non-timer
+ * interrupts are enabled when rtimer_run_next is run, we can thus get one
+ * interrupt on top of it all.
+ */
 static void
 maybe_queue_rtimer(struct rtimer *rtimer)
 {
   const struct rtimer *t;
+  bool level = nesting;
 
-  for(t = set_queue; t; t = t->more) {
+  nesting = 1;
+  for(t = set_queue[level]; t; t = t->more[level]) {
     if(t == rtimer) {
       return;
     }
   }
-  rtimer->more = set_queue;
-  set_queue = rtimer;
+  rtimer->more[level] = set_queue[level];
+  set_queue[level] = rtimer;
+  nesting = level;
 }
 /*---------------------------------------------------------------------------*/
 int
