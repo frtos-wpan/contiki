@@ -149,8 +149,10 @@ static void reset_sim(void)
 	next_rtimer = NULL;
 	locked = 0;
 	deferred = 0;
-	set_queue = NULL;
+	set_queue[0] = NULL;
+	set_queue[1] = NULL;
 	setting = 0;
+	nesting = 0;
 
 	memset(&ra, 0, sizeof(ra));
 	memset(&rb, 0, sizeof(rb));
