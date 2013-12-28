@@ -153,6 +153,7 @@ static void reset_sim(void)
 	set_queue[1] = NULL;
 	setting = 0;
 	nesting = 0;
+	generation = 0;
 
 	memset(&ra, 0, sizeof(ra));
 	memset(&rb, 0, sizeof(rb));
