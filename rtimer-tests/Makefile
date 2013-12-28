@@ -1,5 +1,5 @@
 TESTS = one-timer one-cancel \
-	resched \
+	resched rere \
 	seq-idle
 
 .PHONY:	test cov clean

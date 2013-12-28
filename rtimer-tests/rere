@@ -1,0 +1,29 @@
+#!/bin/sh -e
+#
+# Timer gets re-submitted by handler and re-scheduled by interrupt
+#
+
+#----- Reschedule in init, expire later ---------------------------------------
+
+
+./run "in init, make later" <<EOF
+init:
+	RAx(100);
+handler:
+	if (rt->time == 100)
+		RAy(110);
+probe:
+	RAz(120);
+expect:
+	Sx(A,100)Sz(A,120)Tx(A,100Sy(A,110))Ty(A,110)
+	Sx(A,100)Sz(A,120)Tz(A,120)
+	Sx(A,100)Tx(A,100Sy(A,110))Sz(A,120)Ty(A,110)Tz(A,120)
+	Sx(A,100)Tx(A,100Sy(A,110))Sz(A,120)Tz(A,120)
+	Sx(A,100)Tx(A,100Sy(A,110))Ty(A,110)
+	Sx(A,100)Tx(A,100Sy(A,110))Ty(A,110)Sz(A,120)Tz(A,120)
+	Sx(A,100)Tx(A,100Sy(A,110Sz(A,120)))Ty(A,110)
+	Sx(A,100)Tx(A,100Sy(A,110Sz(A,120)))Tz(A,120)
+	Sx(A,100Sz(A,120))Tx(A,100Sy(A,110))Ty(A,110)
+	Sx(A,100Sz(A,120))Tz(A,120)
+	Sz(A,120)Sx(A,100)Tx(A,100Sy(A,110))Ty(A,110)
+EOF
