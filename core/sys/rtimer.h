@@ -94,7 +94,7 @@ struct rtimer {
   rtimer_callback_t set_func;
   void *set_ptr;
   bool set_cancel;
-  struct rtimer *more;		/* more timers with delayed setting */
+  struct rtimer *more[2];	/* more timers with delayed setting */
 };
 
 enum {
